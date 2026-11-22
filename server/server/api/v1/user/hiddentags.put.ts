@@ -18,6 +18,8 @@ export default defineEventHandler(async (h3) => {
     select: { id: true },
   });
 
+  // SAFETY: the id comes from the signed-in session, so the user exists
+  // eslint-disable-next-line drop/no-prisma-delete
   const user = await prisma.user.update({
     where: { id: userId },
     data: { hiddenTags: { set: tags } },

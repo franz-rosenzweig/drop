@@ -1,7 +1,9 @@
 <template>
   <div>
     <div class="border-b border-zinc-800 pb-4 w-full">
-      <h2 class="text-xl font-semibold tracking-tight text-zinc-100 sm:text-3xl">
+      <h2
+        class="text-xl font-semibold tracking-tight text-zinc-100 sm:text-3xl"
+      >
         {{ $t("account.settings") }}
       </h2>
     </div>
