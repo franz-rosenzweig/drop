@@ -53,6 +53,11 @@ model Game {
   collections CollectionEntry[]
   saves       SaveSlot[]
   screenshots Screenshot[]
+
+  // Where the game keeps its save files, for cloud saves. Locked once an admin
+  // edits the list, so automatic fills leave it alone.
+  saveLocations       GameSaveLocation[]
+  saveLocationsLocked Boolean            @default(false)
   tags        GameTag[]
   playtime    Playtime[]
 
@@ -192,6 +197,26 @@ model LaunchConfiguration {
 }
 
 // A save slot for a game
+enum SaveLocationSource {
+  Manual   @map("manual")
+  Ludusavi @map("ludusavi")
+  Engine   @map("engine")
+}
+
+// One place a game keeps saves, as a Ludusavi-style path template such as
+// "<base>/www/save" or "<winAppData>/Studio/Game". A null platform means the
+// path applies wherever it resolves.
+model GameSaveLocation {
+  id       String             @id @default(uuid())
+  gameId   String
+  game     Game               @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  path     String
+  platform Platform?
+  source   SaveLocationSource @default(Manual)
+
+  @@index([gameId])
+}
+
 model SaveSlot {
   gameId String
   game   Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)

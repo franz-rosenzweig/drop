@@ -261,6 +261,10 @@ const scheduledTasks: {
     name: "Check Integrity",
     description: "Re-imports all versions and updates their manifests.",
   },
+  "saves:fill-locations": {
+    name: t("tasks.admin.scheduled.fillSaveLocationsName"),
+    description: t("tasks.admin.scheduled.fillSaveLocationsDescription"),
+  },
 };
 
 async function startTask(taskGroup: string) {

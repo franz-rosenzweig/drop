@@ -119,8 +119,13 @@ import {
   ListboxOptions,
 } from "@headlessui/vue";
 import { ChevronUpDownIcon } from "@heroicons/vue/16/solid";
-import { GameEditorMetadata, GameEditorVersion } from "#components";
 import {
+  GameEditorMetadata,
+  GameEditorSaves,
+  GameEditorVersion,
+} from "#components";
+import {
+  ArchiveBoxIcon,
   ArrowTopRightOnSquareIcon,
   DocumentIcon,
   PencilIcon,
@@ -143,6 +148,7 @@ definePageMeta({
 enum GameEditorMode {
   Metadata = "Metadata",
   Versions = "Versions",
+  Saves = "Saves",
 }
 
 const components: {
@@ -153,6 +159,7 @@ const components: {
     editor: GameEditorVersion,
     icon: ServerStackIcon,
   },
+  [GameEditorMode.Saves]: { editor: GameEditorSaves, icon: ArchiveBoxIcon },
 };
 
 const currentMode = ref<GameEditorMode>(GameEditorMode.Metadata);

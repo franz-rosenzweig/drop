@@ -13,6 +13,7 @@ import cleanupSessions from "./registry/sessions";
 import checkUpdate from "./registry/update";
 import cleanupObjects from "./registry/objects";
 import checkIntegrity from "./registry/check-integrity";
+import fillSaveLocations from "./registry/save-locations";
 
 type TaskActionLink = `${string}:${string}`;
 
@@ -58,7 +59,10 @@ class TaskHandler {
     "cleanup:sessions",
     "check:update",
   ];
-  private weeklyScheduledTasks: TaskGroup[] = ["cleanup:objects"];
+  private weeklyScheduledTasks: TaskGroup[] = [
+    "cleanup:objects",
+    "saves:fill-locations",
+  ];
 
   constructor() {
     // register the cleanup invitations task
@@ -67,6 +71,7 @@ class TaskHandler {
     this.saveScheduledTask(checkUpdate);
     this.saveScheduledTask(cleanupObjects);
     this.saveScheduledTask(checkIntegrity);
+    this.saveScheduledTask(fillSaveLocations);
   }
 
   /**

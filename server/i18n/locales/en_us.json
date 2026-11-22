@@ -553,6 +553,30 @@
       "offlineTitle": "Game offline",
       "openEditor": "Open in Editor {arrow}",
       "openStore": "Open in Store",
+      "saves": {
+        "add": "Add",
+        "any": "Any",
+        "none": "No save locations",
+        "path": "Path",
+        "platform": "Platform",
+        "platforms": {
+          "linux": "Linux",
+          "macos": "macOS",
+          "windows": "Windows"
+        },
+        "remove": "Remove",
+        "save": "Save",
+        "saveFailed": "Couldn't save the save locations",
+        "source": "Source",
+        "sources": {
+          "engine": "Engine",
+          "ludusavi": "Ludusavi",
+          "manual": "Manual"
+        },
+        "suggest": "Suggest",
+        "suggestFailed": "Couldn't suggest save locations",
+        "title": "Save locations"
+      },
       "shortDesc": "Short Description",
       "sources": {
         "create": "Create source",
@@ -768,7 +792,9 @@
         "cleanupObjectsDescription": "Detects and deletes unreferenced and unused objects to save space.",
         "cleanupObjectsName": "Clean up objects",
         "cleanupSessionsDescription": "Cleans up expired sessions to save space and ensure security.",
-        "cleanupSessionsName": "Clean up sessions."
+        "cleanupSessionsName": "Clean up sessions.",
+        "fillSaveLocationsDescription": "Looks up where each game keeps its saves.",
+        "fillSaveLocationsName": "Fill save locations"
       },
       "utilityTitle": "Utility tasks",
       "viewTask": "View {arrow}",
