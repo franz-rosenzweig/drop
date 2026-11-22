@@ -156,8 +156,13 @@ async function fromEngine(gameId: string): Promise<SaveLocationInput[]> {
 }
 
 function dedupe(locations: SaveLocationInput[]) {
+  // A path that applies on any platform makes its per-platform copies redundant.
+  const anywhere = new Set(
+    locations.filter((l) => l.platform === null).map((l) => l.path),
+  );
   const seen = new Set<string>();
   return locations.filter((l) => {
+    if (l.platform !== null && anywhere.has(l.path)) return false;
     const key = `${l.platform ?? "*"}|${l.path}`;
     if (seen.has(key)) return false;
     seen.add(key);

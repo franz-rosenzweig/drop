@@ -101,16 +101,18 @@ import type { SerializeObject } from "nitropack";
 import { XMarkIcon } from "@heroicons/vue/24/outline";
 import type { AdminFetchGameType } from "~/server/api/v1/admin/game/[id]/index.get";
 
-type Row = {
-  path: string;
-  platform: "Windows" | "macOS" | "Linux" | null;
-  source: "Manual" | "Ludusavi" | "Engine";
-};
-
 defineProps<{ unimportedVersions: string[] }>();
 const game = defineModel<SerializeObject<AdminFetchGameType>>({
   required: true,
 });
+
+const loaded = await $dropFetch("/api/v1/admin/game/:id/savelocations", {
+  params: { id: game.value.id },
+});
+type Row = Pick<
+  (typeof loaded.locations)[number],
+  "path" | "platform" | "source"
+>;
 
 const { t } = useI18n();
 const platformOptions: { value: Row["platform"]; label: string }[] = [
@@ -130,9 +132,6 @@ const headings = [
   t("library.admin.saves.source"),
 ];
 
-const loaded = await $dropFetch<{ locked: boolean; locations: Row[] }>(
-  `/api/v1/admin/game/${game.value.id}/savelocations`,
-);
 const rows = ref<Row[]>(loaded.locations.map(strip));
 const dirty = ref(false);
 const busy = ref(false);
@@ -154,9 +153,13 @@ function remove(index: number) {
 async function suggest() {
   busy.value = true;
   try {
-    const suggested = await $dropFetch<Row[]>(
-      `/api/v1/admin/game/${game.value.id}/savelocations/suggest`,
-      { method: "POST", failTitle: t("library.admin.saves.suggestFailed") },
+    const suggested = await $dropFetch(
+      "/api/v1/admin/game/:id/savelocations/suggest",
+      {
+        method: "POST",
+        params: { id: game.value.id },
+        failTitle: t("library.admin.saves.suggestFailed"),
+      },
     );
     const have = new Set(rows.value.map((r) => `${r.platform}|${r.path}`));
     const fresh = suggested.filter((s) => !have.has(`${s.platform}|${s.path}`));
@@ -170,10 +173,11 @@ async function suggest() {
 async function save() {
   busy.value = true;
   try {
-    const saved = await $dropFetch<Row[]>(
-      `/api/v1/admin/game/${game.value.id}/savelocations`,
+    const saved = await $dropFetch(
+      "/api/v1/admin/game/:id/savelocations",
       {
         method: "PUT",
+        params: { id: game.value.id },
         body: { locations: rows.value.filter((r) => r.path.trim()) },
         failTitle: t("library.admin.saves.saveFailed"),
       },
