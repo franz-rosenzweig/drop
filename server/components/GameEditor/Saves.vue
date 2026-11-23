@@ -173,15 +173,12 @@ async function suggest() {
 async function save() {
   busy.value = true;
   try {
-    const saved = await $dropFetch(
-      "/api/v1/admin/game/:id/savelocations",
-      {
-        method: "PUT",
-        params: { id: game.value.id },
-        body: { locations: rows.value.filter((r) => r.path.trim()) },
-        failTitle: t("library.admin.saves.saveFailed"),
-      },
-    );
+    const saved = await $dropFetch("/api/v1/admin/game/:id/savelocations", {
+      method: "PUT",
+      params: { id: game.value.id },
+      body: { locations: rows.value.filter((r) => r.path.trim()) },
+      failTitle: t("library.admin.saves.saveFailed"),
+    });
     rows.value = saved.map(strip);
     dirty.value = false;
   } finally {
