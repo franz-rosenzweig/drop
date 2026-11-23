@@ -1,0 +1,74 @@
+# Builds the desktop app from this fork for an Apple Silicon Mac and a Windows
+# PC. Nothing is signed with a developer certificate and nothing is released:
+# the installers are kept as workflow artifacts.
+name: "Fork: build desktop app"
+
+on:
+  push:
+    branches: [cloud-saves-rc6]
+    paths:
+      - "desktop/**"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/fork-app-build.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: fork-app-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    if: github.repository != 'Drop-OSS/drop'
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macos-arm64
+            runner: macos-14
+            target: aarch64-apple-darwin
+            bundles: app,dmg
+          - name: windows-x64
+            runner: windows-latest
+            target: x86_64-pc-windows-msvc
+            bundles: nsis
+
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+          cache: pnpm
+
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "./desktop/src-tauri -> target"
+
+      - run: pnpm install
+
+      - name: Build
+        shell: bash
+        working-directory: desktop
+        run: |
+          # "-" = ad-hoc signature on the Mac, since there's no certificate here.
+          echo '{"bundle":{"macOS":{"signingIdentity":"-"}}}' > "$RUNNER_TEMP/fork.conf.json"
+          pnpm tauri build --target "${{ matrix.target }}" --bundles "${{ matrix.bundles }}" --config "$RUNNER_TEMP/fork.conf.json"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: drop-app-${{ matrix.name }}-${{ github.sha }}
+          path: |
+            desktop/src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg
+            desktop/src-tauri/target/${{ matrix.target }}/release/bundle/nsis/*-setup.exe
+          if-no-files-found: error
