@@ -6,3 +6,4 @@ pub mod normalise;
 pub mod path;
 pub mod placeholder;
 pub mod resolver;
+pub mod sync;

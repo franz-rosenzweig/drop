@@ -9,7 +9,6 @@ use crate::error::BackupError;
 use super::{backup_manager::BackupHandler, placeholder::*};
 use database::GameVersion;
 use log::{debug, warn};
-use rustix::path::Arg;
 use tempfile::tempfile;
 
 use super::{backup_manager::BackupManager, metadata::CloudSaveMetadata, normalise::normalize};
@@ -188,7 +187,7 @@ pub fn parse_path(
     println!("Parsing: {:?}", &path);
     let mut s = PathBuf::new();
     for component in path.components() {
-        match component.as_str().unwrap() {
+        match component.as_os_str().to_str().unwrap_or_default() {
             ROOT => s.push(backup_handler.root_translate(&path, game)?),
             GAME => s.push(backup_handler.game_translate(&path, game)?),
             BASE => s.push(backup_handler.base_translate(&path, game)?),

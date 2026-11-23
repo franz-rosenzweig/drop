@@ -29,7 +29,14 @@ pub enum LaunchResult {
 }
 
 #[tauri::command]
-pub fn launch_game(id: String, index: usize) -> Result<LaunchResult, ProcessError> {
+pub async fn launch_game(id: String, index: usize) -> Result<LaunchResult, ProcessError> {
+    // Bring the server's saves down first, unless the game is already running
+    // (launching it again fails below anyway).
+    let running = PROCESS_MANAGER.lock().is_running(&id);
+    if !running {
+        process::saves::pull_before_launch(&id).await;
+    }
+
     let result = {
         let mut process_manager_lock = PROCESS_MANAGER.lock();
 

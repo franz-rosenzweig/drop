@@ -37,6 +37,8 @@ pub struct RunningProcess {
     handle: Arc<SharedChild>,
     start: SystemTime,
     manually_killed: bool,
+    /// A game run, rather than a setup run: its saves go up when it quits.
+    sync_saves: bool,
 }
 
 pub struct ProcessManager<'a> {
@@ -137,6 +139,10 @@ impl ProcessManager<'_> {
         }
     }
 
+    pub fn is_running(&self, game_id: &str) -> bool {
+        self.processes.contains_key(game_id)
+    }
+
     pub fn get_log_dir(&self, game_id: String) -> PathBuf {
         self.log_output_dir.join(game_id)
     }
@@ -215,6 +221,12 @@ impl ProcessManager<'_> {
                     warn!("failed to report playtime for game {playtime_game_id}: {error}");
                 }
             });
+        }
+
+        if process.sync_saves
+            && let Some(ctx) = crate::saves::sync_context(&db_handle, &game_id)
+        {
+            crate::saves::push_after_exit(ctx);
         }
 
         Ok(())
@@ -400,6 +412,14 @@ impl ProcessManager<'_> {
             game_version.user_configuration.override_handler.as_deref(),
         )?;
         debug!("using process handler {:?}", process_handler.id());
+
+        let sync_saves = matches!(
+            game_status,
+            GameDownloadStatus::Installed {
+                install_type: InstalledGameType::Installed,
+                ..
+            }
+        );
 
         let (target_command, emulator) = match game_status {
             GameDownloadStatus::Installed {
@@ -599,6 +619,7 @@ impl ProcessManager<'_> {
                 handle: wait_thread_handle,
                 start: SystemTime::now(),
                 manually_killed: false,
+                sync_saves,
             },
         );
         spawn(move || {
